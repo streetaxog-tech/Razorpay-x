@@ -103,23 +103,8 @@
     </style>
 
     <!-- Firebase Scripts -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-        import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-analytics.js";
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyAbYNks_Wbc5ta1DVxK677IUJro28_Xps8",
-            authDomain: "razorpay-panels.firebaseapp.com",
-            projectId: "razorpay-panels",
-            storageBucket: "razorpay-panels.firebasestorage.app",
-            messagingSenderId: "414111056846",
-            appId: "1:414111056846:web:c0890b7d6a65e416d8e19f",
-            measurementId: "G-2JBK6VNVK2"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const analytics = getAnalytics(app);
-    </script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-analytics-compat.js"></script>
 </head>
 
 <body>
@@ -171,6 +156,21 @@
     </div>
 
     <script>
+        // Firebase Config
+        const firebaseConfig = {
+            apiKey: "AIzaSyAbYNks_Wbc5ta1DVxK677IUJro28_Xps8",
+            authDomain: "razorpay-panels.firebaseapp.com",
+            projectId: "razorpay-panels",
+            storageBucket: "razorpay-panels.firebasestorage.app",
+            messagingSenderId: "414111056846",
+            appId: "1:414111056846:web:c0890b7d6a65e416d8e19f",
+            measurementId: "G-2JBK6VNVK2"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        firebase.analytics();
+
+        // App Logic
         let accounts = [];
         let totalEarning = 0;
         let notificationInterval;
