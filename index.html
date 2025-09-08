@@ -183,7 +183,14 @@
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
 
-            if (email === 'pagalnafar1696@gmail.com' && password === 'ayan@123') {
+            const users = [
+                { email: 'pagalnafar1696@gmail.com', password: 'ayan@123' },
+                { email: 'mithunchauhan16964@gmail.com', password: '@12345' }
+            ];
+
+            const validUser = users.find(u => u.email === email && u.password === password);
+
+            if (validUser) {
                 document.getElementById('dashboard').style.display = 'block';
                 alert('Login Successful');
             } else {
