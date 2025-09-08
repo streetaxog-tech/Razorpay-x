@@ -3,160 +3,15 @@
 
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>RazorPay Panel</title>
-    <link rel="icon" href="logo.png.jpg" type="image/png"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Razorpay Panel</title>
+    <link rel="icon" href="logo.png.jpg" type="image/png">
 
-    <style>
-        body {
-            font-family: 'Arial', sans-serif;
-            margin: 0;
-            padding: 0;
-            background: linear-gradient(-45deg, #1e3c72, #2a5298, #2980b9, #6dd5fa);
-            background-size: 400% 400%;
-            animation: gradientBG 15s ease infinite;
-            color: #ffffff;
-        }
-
-        @keyframes gradientBG {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-
-        header {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-            background-color: rgba(0, 0, 0, 0.7);
-        }
-
-        header img {
-            width: 50px;
-            margin-right: 15px;
-        }
-
-        header h1 {
-            font-size: 28px;
-            font-weight: bold;
-        }
-
-        .container {
-            max-width: 800px;
-            margin: auto;
-            padding: 20px;
-        }
-
-        input, select, button {
-            display: block;
-            width: 100%;
-            padding: 12px;
-            margin: 10px 0;
-            border-radius: 8px;
-            border: none;
-            font-size: 16px;
-        }
-
-        button {
-            background-color: #00b894;
-            color: #fff;
-            cursor: pointer;
-        }
-
-        .notification {
-            background-color: rgba(0, 184, 148, 0.8);
-            padding: 15px;
-            border-radius: 10px;
-            margin-top: 20px;
-            font-size: 18px;
-            min-height: 50px;
-            text-align: center;
-        }
-
-        .accounts {
-            margin-top: 20px;
-        }
-
-        .account-item {
-            background-color: rgba(255,255,255,0.1);
-            padding: 12px;
-            border-radius: 8px;
-            margin-bottom: 10px;
-        }
-
-        .earnings {
-            background-color: rgba(0, 184, 148, 0.8);
-            padding: 15px;
-            border-radius: 8px;
-            margin-top: 20px;
-            font-size: 22px;
-            text-align: center;
-        }
-
-        .add-account-section {
-            background-color: rgba(255, 255, 255, 0.1);
-            padding: 20px;
-            border-radius: 10px;
-            margin-top: 20px;
-        }
-    </style>
-
-    <!-- Firebase Scripts -->
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-analytics-compat.js"></script>
-</head>
-
-<body>
-
-    <header>
-        <img src="logo.png.jpg" alt="Logo"/>
-        <h1>RazorPay Panel</h1>
-    </header>
-
-    <div class="container">
-
-        <div class="login-section">
-            <h3>Login</h3>
-            <input type="email" id="email" placeholder="Email" />
-            <input type="password" id="password" placeholder="Password" />
-            <button onclick="loginUser()">Login</button>
-        </div>
-
-        <div id="dashboard" style="display:none;">
-
-            <div class="add-account-section">
-                <h3>Add Bank Account</h3>
-                <select id="accountType">
-                    <option value="Saving Account">Saving Account</option>
-                    <option value="Current Account">Current Account</option>
-                    <option value="Corporate Account">Corporate Account</option>
-                </select>
-                <input type="text" id="accountHolderName" placeholder="Account Holder Name" />
-                <input type="text" id="accountNumber" placeholder="Account Number" />
-                <input type="text" id="ifscCode" placeholder="IFSC Code" />
-                <button onclick="addAccount()">Add Account</button>
-            </div>
-
-            <div class="accounts">
-                <h3>Connected Accounts</h3>
-                <div id="accountList">
-                    <p>No accounts connected yet.</p>
-                </div>
-            </div>
-
-            <div class="notification" id="notification">
-                Add a bank account to start seeing notifications.
-            </div>
-
-            <div class="earnings" id="totalEarning">Total Earnings: ₹0</div>
-
-        </div>
-
-    </div>
-
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-analytics-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
     <script>
-        // Firebase Config
         const firebaseConfig = {
             apiKey: "AIzaSyAbYNks_Wbc5ta1DVxK677IUJro28_Xps8",
             authDomain: "razorpay-panels.firebaseapp.com",
@@ -166,90 +21,154 @@
             appId: "1:414111056846:web:c0890b7d6a65e416d8e19f",
             measurementId: "G-2JBK6VNVK2"
         };
-
         firebase.initializeApp(firebaseConfig);
         firebase.analytics();
+    </script>
 
-        // App Logic
-        let accounts = [];
-        let totalEarning = 0;
-        let notificationInterval;
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
 
-        const notificationEl = document.getElementById('notification');
-        const accountListEl = document.getElementById('accountList');
-        const totalEarningEl = document.getElementById('totalEarning');
+        .container {
+            background-color: rgba(0, 0, 0, 0.85);
+            padding: 30px;
+            border-radius: 15px;
+            max-width: 400px;
+            width: 100%;
+        }
 
-        function loginUser() {
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        input, select, button {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 8px;
+            border: none;
+            font-size: 16px;
+        }
+
+        button {
+            background-color: #4CAF50;
+            color: white;
+            cursor: pointer;
+        }
+
+        .notification {
+            position: fixed;
+            bottom: 10px;
+            right: 10px;
+            background: #333;
+            color: #fff;
+            padding: 15px;
+            border-radius: 10px;
+            display: none;
+            box-shadow: 0 0 10px #000;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container" id="login-section">
+        <h1>Login to Razorpay Panel</h1>
+        <input type="email" id="email" placeholder="Email" required />
+        <input type="password" id="password" placeholder="Password" required />
+        <button onclick="login()">Login</button>
+    </div>
+
+    <div class="container" id="dashboard-section" style="display:none;">
+        <h1>Welcome to Razorpay Panel</h1>
+
+        <input type="text" id="acc-holder" placeholder="Account Holder Name" required />
+        <input type="text" id="acc-number" placeholder="Account Number" required />
+        <input type="text" id="ifsc" placeholder="IFSC Code" required />
+
+        <select id="acc-type">
+            <option value="saving">Saving Account</option>
+            <option value="current">Current Account</option>
+            <option value="corporate">Corporate Account</option>
+        </select>
+
+        <button onclick="addAccount()">Add Bank Account</button>
+
+        <h3>Client Earnings:</h3>
+        <div id="earnings">₹0</div>
+    </div>
+
+    <div class="notification" id="notification"></div>
+
+    <script>
+        const validUsers = [
+            { email: "mithunchauhan16964@gmail.com", password: "@12345" },
+            { email: "pagalnafar1696@gmail.com", password: "ayan@123" }
+        ];
+
+        let totalEarnings = 0;
+
+        function login() {
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
 
-            const users = [
-                { email: 'pagalnafar1696@gmail.com', password: 'ayan@123' },
-                
-            ];
-
-            const validUser = users.find(u => u.email === email && u.password === password);
+            const validUser = validUsers.find(u => u.email === email && u.password === password);
 
             if (validUser) {
-                document.getElementById('dashboard').style.display = 'block';
-                alert('Login Successful');
+                document.getElementById('login-section').style.display = 'none';
+                document.getElementById('dashboard-section').style.display = 'block';
+                Notification.requestPermission();
             } else {
-                alert('Invalid Credentials');
+                alert('Invalid email or password!');
             }
         }
 
         function addAccount() {
-            const type = document.getElementById('accountType').value;
-            const name = document.getElementById('accountHolderName').value;
-            const number = document.getElementById('accountNumber').value;
-            const ifsc = document.getElementById('ifscCode').value;
+            const holder = document.getElementById('acc-holder').value;
+            const accNumber = document.getElementById('acc-number').value;
+            const ifsc = document.getElementById('ifsc').value;
+            const type = document.getElementById('acc-type').value;
 
-            if (!name || !number || !ifsc) {
+            if (holder && accNumber && ifsc) {
+                startFakeNotifications(type);
+            } else {
                 alert('Please fill all fields');
-                return;
             }
-
-            const newAccount = { type, accountHolderName: name, accountNumber: number, ifscCode: ifsc };
-            accounts.push(newAccount);
-
-            updateAccountList();
-            if (notificationInterval) clearInterval(notificationInterval);
-            startFakeNotifications(accounts);
         }
 
-        function updateAccountList() {
-            accountListEl.innerHTML = '';
-            accounts.forEach(acc => {
-                const el = document.createElement('div');
-                el.className = 'account-item';
-                el.innerText = `${acc.type}: ${acc.accountHolderName} - ${acc.accountNumber} (IFSC: ${acc.ifscCode})`;
-                accountListEl.appendChild(el);
-            });
-        }
+        function startFakeNotifications(type) {
+            setInterval(() => {
+                let min, max, commissionRate;
 
-        function startFakeNotifications(accounts) {
-            notificationInterval = setInterval(() => {
-                if (accounts.length === 0) return;
-
-                const randomAcc = accounts[Math.floor(Math.random() * accounts.length)];
-                let amount = 0;
-
-                if (randomAcc.type === 'Saving Account') {
-                    amount = Math.floor(Math.random() * (1000 - 100 + 1)) + 100;
-                } else if (randomAcc.type === 'Current Account') {
-                    amount = Math.floor(Math.random() * (10000 - 1000 + 1)) + 1000;
-                } else if (randomAcc.type === 'Corporate Account') {
-                    amount = Math.floor(Math.random() * (50000 - 5000 + 1)) + 5000;
+                if (type === 'saving') {
+                    min = 100; max = 1000; commissionRate = 3;
+                } else if (type === 'current') {
+                    min = 1000; max = 10000; commissionRate = 5;
+                } else if (type === 'corporate') {
+                    min = 5000; max = 50000; commissionRate = 15;
                 }
 
-                notificationEl.innerText = `₹${amount} credited to your ${randomAcc.type} (${randomAcc.accountHolderName}) (Fake Transaction)`;
+                const amount = Math.floor(Math.random() * (max - min + 1) + min);
+                totalEarnings += amount * commissionRate / 100;
+                document.getElementById('earnings').innerText = `₹${totalEarnings.toFixed(2)}`;
 
-                totalEarning += amount;
-                totalEarningEl.innerText = `Total Earnings: ₹${totalEarning}`;
+                if (Notification.permission === 'granted') {
+                    new Notification('Payment Credited', {
+                        body: `₹${amount} credited to your ${type.charAt(0).toUpperCase() + type.slice(1)} Account`,
+                        icon: 'logo.png.jpg'
+                    });
+                }
             }, 4000);
         }
     </script>
-
 </body>
 
 </html>
