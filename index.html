@@ -3,14 +3,17 @@
 
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Razorpay Panel</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Razorpay Premium Panel</title>
+
+    <!-- Favicon & Logo -->
     <link rel="icon" href="logo.png.jpg" type="image/png">
 
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-analytics-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+
     <script>
         const firebaseConfig = {
             apiKey: "AIzaSyAbYNks_Wbc5ta1DVxK677IUJro28_Xps8",
@@ -28,31 +31,31 @@
     <style>
         body {
             font-family: 'Arial', sans-serif;
-            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
             color: #fff;
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
+            min-height: 100vh;
             margin: 0;
         }
 
         .container {
-            background-color: rgba(0, 0, 0, 0.85);
+            background-color: rgba(0,0,0,0.9);
             padding: 30px;
             border-radius: 15px;
-            max-width: 400px;
+            max-width: 450px;
             width: 100%;
+            text-align: center;
         }
 
         h1 {
-            text-align: center;
             margin-bottom: 20px;
         }
 
         input, select, button {
             width: 100%;
-            padding: 10px;
+            padding: 12px;
             margin: 10px 0;
             border-radius: 8px;
             border: none;
@@ -67,14 +70,19 @@
 
         .notification {
             position: fixed;
-            bottom: 10px;
-            right: 10px;
+            bottom: 20px;
+            right: 20px;
             background: #333;
             color: #fff;
             padding: 15px;
             border-radius: 10px;
             display: none;
             box-shadow: 0 0 10px #000;
+        }
+
+        #earnings {
+            font-size: 20px;
+            margin-top: 20px;
         }
     </style>
 </head>
@@ -88,7 +96,7 @@
     </div>
 
     <div class="container" id="dashboard-section" style="display:none;">
-        <h1>Welcome to Razorpay Panel</h1>
+        <h1>Welcome to Premium Razorpay Panel</h1>
 
         <input type="text" id="acc-holder" placeholder="Account Holder Name" required />
         <input type="text" id="acc-number" placeholder="Account Number" required />
@@ -102,8 +110,8 @@
 
         <button onclick="addAccount()">Add Bank Account</button>
 
-        <h3>Client Earnings:</h3>
-        <div id="earnings">₹0</div>
+        <h3>Your Earnings</h3>
+        <div id="earnings">₹0.00</div>
     </div>
 
     <div class="notification" id="notification"></div>
@@ -120,14 +128,14 @@
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
 
-            const validUser = validUsers.find(u => u.email === email && u.password === password);
+            const user = validUsers.find(u => u.email === email && u.password === password);
 
-            if (validUser) {
+            if (user) {
                 document.getElementById('login-section').style.display = 'none';
                 document.getElementById('dashboard-section').style.display = 'block';
                 Notification.requestPermission();
             } else {
-                alert('Invalid email or password!');
+                alert('Invalid credentials!');
             }
         }
 
@@ -138,31 +146,37 @@
             const type = document.getElementById('acc-type').value;
 
             if (holder && accNumber && ifsc) {
-                startFakeNotifications(type);
+                startNotifications(type);
             } else {
-                alert('Please fill all fields');
+                alert('Please complete all fields.');
             }
         }
 
-        function startFakeNotifications(type) {
+        function startNotifications(type) {
             setInterval(() => {
                 let min, max, commissionRate;
 
                 if (type === 'saving') {
-                    min = 100; max = 1000; commissionRate = 3;
+                    min = 100;
+                    max = 1000;
+                    commissionRate = 3;
                 } else if (type === 'current') {
-                    min = 1000; max = 10000; commissionRate = 5;
+                    min = 1000;
+                    max = 10000;
+                    commissionRate = 5;
                 } else if (type === 'corporate') {
-                    min = 5000; max = 50000; commissionRate = 15;
+                    min = 5000;
+                    max = 50000;
+                    commissionRate = 15;
                 }
 
                 const amount = Math.floor(Math.random() * (max - min + 1) + min);
-                totalEarnings += amount * commissionRate / 100;
+                totalEarnings += (amount * commissionRate) / 100;
                 document.getElementById('earnings').innerText = `₹${totalEarnings.toFixed(2)}`;
 
                 if (Notification.permission === 'granted') {
-                    new Notification('Payment Credited', {
-                        body: `₹${amount} credited to your ${type.charAt(0).toUpperCase() + type.slice(1)} Account`,
+                    new Notification('New Payment Credited', {
+                        body: `${type.charAt(0).toUpperCase() + type.slice(1)} Account: ₹${amount} credited.`,
                         icon: 'logo.png.jpg'
                     });
                 }
