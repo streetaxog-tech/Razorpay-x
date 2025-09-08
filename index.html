@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RazorPay Fake Panel</title>
+<style>
+  body {
+    font-family: sans-serif;
+    background: #f4f4f4;
+    margin: 0;
+    padding: 0;
+  }
+  .login-panel, .account-panel {
+    width: 320px;
+    margin: 80px auto;
+    padding: 20px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    text-align: center;
+  }
+  input {
+    width: 90%;
+    padding: 10px;
+    margin: 10px 0;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+  }
+  button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 6px;
+    background-color: #4CAF50;
+    color: white;
+    cursor: pointer;
+  }
+  .tabs {
+    display: flex;
+    justify-content: space-around;
+    margin-bottom: 20px;
+  }
+  .tab {
+    cursor: pointer;
+    padding: 10px 20px;
+    border-radius: 8px;
+    background: #eee;
+  }
+  .tab.active {
+    background: #4CAF50;
+    color: white;
+  }
+  .panel-content {
+    display: none;
+  }
+  .panel-content.active {
+    display: block;
+  }
+  .fake-notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: #4CAF50;
+    color: white;
+    padding: 12px 18px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+    font-family: sans-serif;
+    z-index: 1000;
+    animation: slideIn 0.5s ease-out;
+  }
+  @keyframes slideIn {
+    from { transform: translateY(-100%); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+  .note {
+    font-size: 12px;
+    color: #555;
+    margin-top: 10px;
+  }
+</style>
+</head>
+<body>
+
+<!-- Login Panel -->
+<div class="login-panel" id="loginPanel">
+  <h2>RazorPay Login</h2>
+  <input type="email" id="email" placeholder="Email" />
+  <input type="password" id="password" placeholder="Password" />
+  <button onclick="login()">Login</button>
+  <div class="note">All credentials saved to backend (simulated).</div>
+</div>
+
+<!-- Account Panel -->
+<div class="account-panel" id="accountPanel" style="display:none;">
+  <h2>RazorPay Accounts</h2>
+  <div class="tabs">
+    <div class="tab active" onclick="showTab('Saving')">Saving</div>
+    <div class="tab" onclick="showTab('Current')">Current</div>
+    <div class="tab" onclick="showTab('Corporate')">Corporate</div>
+  </div>
+
+  <div id="Saving" class="panel-content active">
+    <button onclick="connectAccount('Saving')">Connect Saving Account</button>
+    <div class="note">Balance not shown. 3% commission per transaction.</div>
+  </div>
+  <div id="Current" class="panel-content">
+    <button onclick="connectAccount('Current')">Connect Current Account</button>
+    <div class="note">Balance not shown. 3% commission per transaction.</div>
+  </div>
+  <div id="Corporate" class="panel-content">
+    <button onclick="connectAccount('Corporate')">Connect Corporate Account</button>
+    <div class="note">Balance not shown. 3% commission per transaction.</div>
+  </div>
+</div>
+
+<script>
+  // Login simulation
+  function login() {
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+    if (!email || !password) { alert('Enter credentials'); return; }
+
+    // Send to backend (Firebase / simulated)
+    console.log('Credentials saved:', email, password);
+
+    // Switch panels
+    document.getElementById('loginPanel').style.display = 'none';
+    document.getElementById('accountPanel').style.display = 'block';
+
+    // Start fake notifications
+    scheduleNotification();
+  }
+
+  // Tab switching
+  function showTab(tabName) {
+    document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+    document.querySelectorAll('.panel-content').forEach(panel => panel.classList.remove('active'));
+    event.target.classList.add('active');
+    document.getElementById(tabName).classList.add('active');
+  }
+
+  // Connect account simulation
+  function connectAccount(accountType) {
+    alert(accountType + ' Account connected successfully!');
+  }
+
+  // Random amount generator
+  function getRandomAmount(accountType) {
+    switch(accountType) {
+      case 'Saving': return Math.floor(Math.random() * (1000 - 100 + 1)) + 100;
+      case 'Current': return Math.floor(Math.random() * (10000 - 2000 + 1)) + 2000;
+      case 'Corporate': return Math.floor(Math.random() * (50000 - 5000 + 1)) + 5000;
+    }
+  }
+
+  // Show fake notification
+  function showFakeNotification() {
+    const types = ['Saving', 'Current', 'Corporate'];
+    const accountType = types[Math.floor(Math.random() * types.length)];
+    const amount = getRandomAmount(accountType);
+    const commission = Math.round(amount * 0.03);
+    const netAmount = amount - commission;
+
+    const notification = document.createElement('div');
+    notification.className = 'fake-notification';
+    notification.innerHTML = `
+      <strong>RazorPay</strong><br>
+      ₹${amount} credited to your ${accountType} account<br>
+      Commission: ₹${commission}, Net: ₹${netAmount}
+    `;
+    document.body.appendChild(notification);
+
+    setTimeout(() => notification.remove(), 5000);
+  }
+
+  // Schedule random notifications
+  function randomInterval() {
+    return Math.floor(Math.random() * (60000 - 15000 + 1)) + 15000; // 15-60 sec for demo
+  }
+
+  function scheduleNotification() {
+    showFakeNotification();
+    setTimeout(scheduleNotification, randomInterval());
+  }
+</script>
+
+</body>
+</html>
