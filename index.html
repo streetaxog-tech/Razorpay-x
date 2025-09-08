@@ -3,81 +3,20 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>RazorPay Fake Panel</title>
+<title>RazorPay Fake Panel Demo</title>
 <style>
-  body {
-    font-family: sans-serif;
-    background: #f4f4f4;
-    margin: 0;
-    padding: 0;
-  }
-  .login-panel, .account-panel {
-    width: 320px;
-    margin: 80px auto;
-    padding: 20px;
-    background: white;
-    border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-    text-align: center;
-  }
-  input {
-    width: 90%;
-    padding: 10px;
-    margin: 10px 0;
-    border-radius: 6px;
-    border: 1px solid #ccc;
-  }
-  button {
-    padding: 10px 20px;
-    border: none;
-    border-radius: 6px;
-    background-color: #4CAF50;
-    color: white;
-    cursor: pointer;
-  }
-  .tabs {
-    display: flex;
-    justify-content: space-around;
-    margin-bottom: 20px;
-  }
-  .tab {
-    cursor: pointer;
-    padding: 10px 20px;
-    border-radius: 8px;
-    background: #eee;
-  }
-  .tab.active {
-    background: #4CAF50;
-    color: white;
-  }
-  .panel-content {
-    display: none;
-  }
-  .panel-content.active {
-    display: block;
-  }
-  .fake-notification {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    background: #4CAF50;
-    color: white;
-    padding: 12px 18px;
-    border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
-    font-family: sans-serif;
-    z-index: 1000;
-    animation: slideIn 0.5s ease-out;
-  }
-  @keyframes slideIn {
-    from { transform: translateY(-100%); opacity: 0; }
-    to { transform: translateY(0); opacity: 1; }
-  }
-  .note {
-    font-size: 12px;
-    color: #555;
-    margin-top: 10px;
-  }
+  body { font-family: sans-serif; background: #f4f4f4; margin:0; padding:0; }
+  .login-panel, .account-panel { width: 320px; margin: 80px auto; padding: 20px; background: #fff; border-radius:12px; box-shadow: 0 4px 12px rgba(0,0,0,0.2); text-align:center; }
+  input { width: 90%; padding:10px; margin:10px 0; border-radius:6px; border:1px solid #ccc; }
+  button { padding:10px 20px; border:none; border-radius:6px; background-color:#4CAF50; color:white; cursor:pointer; }
+  .tabs { display:flex; justify-content:space-around; margin-bottom:20px; }
+  .tab { cursor:pointer; padding:10px 20px; border-radius:8px; background:#eee; }
+  .tab.active { background:#4CAF50; color:white; }
+  .panel-content { display:none; }
+  .panel-content.active { display:block; }
+  .fake-notification { position:fixed; top:20px; right:20px; background:#4CAF50; color:white; padding:12px 18px; border-radius:10px; box-shadow:0 4px 8px rgba(0,0,0,0.3); z-index:1000; animation:slideIn 0.5s ease-out; font-family:sans-serif; }
+  @keyframes slideIn { from {transform: translateY(-100%); opacity:0;} to {transform:translateY(0); opacity:1;} }
+  .note { font-size:12px; color:#555; margin-top:10px; }
 </style>
 </head>
 <body>
@@ -85,19 +24,19 @@
 <!-- Login Panel -->
 <div class="login-panel" id="loginPanel">
   <h2>RazorPay Login</h2>
-  <input type="email" id="email" placeholder="Email" />
-  <input type="password" id="password" placeholder="Password" />
+  <input type="email" id="email" placeholder="Email" value="demomail@gmail.com" />
+  <input type="password" id="password" placeholder="Password" value="11111" />
   <button onclick="login()">Login</button>
-  <div class="note">All credentials saved to backend (simulated).</div>
+  <div class="note">Demo credentials: demomail@gmail.com / 11111</div>
 </div>
 
 <!-- Account Panel -->
 <div class="account-panel" id="accountPanel" style="display:none;">
   <h2>RazorPay Accounts</h2>
   <div class="tabs">
-    <div class="tab active" onclick="showTab('Saving')">Saving</div>
-    <div class="tab" onclick="showTab('Current')">Current</div>
-    <div class="tab" onclick="showTab('Corporate')">Corporate</div>
+    <div class="tab active" onclick="showTab('Saving', event)">Saving</div>
+    <div class="tab" onclick="showTab('Current', event)">Current</div>
+    <div class="tab" onclick="showTab('Corporate', event)">Corporate</div>
   </div>
 
   <div id="Saving" class="panel-content active">
@@ -115,14 +54,20 @@
 </div>
 
 <script>
+  let connectedAccounts = [];
+
   // Login simulation
   function login() {
     const email = document.getElementById('email').value;
     const password = document.getElementById('password').value;
-    if (!email || !password) { alert('Enter credentials'); return; }
 
-    // Send to backend (Firebase / simulated)
-    console.log('Credentials saved:', email, password);
+    // Demo credentials check
+    if(email !== 'demomail@gmail.com' || password !== '11111') {
+      alert('Invalid demo credentials!');
+      return;
+    }
+
+    console.log('Demo credentials used:', email);
 
     // Switch panels
     document.getElementById('loginPanel').style.display = 'none';
@@ -133,16 +78,21 @@
   }
 
   // Tab switching
-  function showTab(tabName) {
+  function showTab(tabName, event) {
     document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
     document.querySelectorAll('.panel-content').forEach(panel => panel.classList.remove('active'));
     event.target.classList.add('active');
     document.getElementById(tabName).classList.add('active');
   }
 
-  // Connect account simulation
+  // Connect multiple accounts
   function connectAccount(accountType) {
-    alert(accountType + ' Account connected successfully!');
+    if (!connectedAccounts.includes(accountType)) {
+      connectedAccounts.push(accountType);
+      alert(accountType + ' Account connected successfully!');
+    } else {
+      alert(accountType + ' Account already connected!');
+    }
   }
 
   // Random amount generator
@@ -154,10 +104,11 @@
     }
   }
 
-  // Show fake notification
+  // Show fake notification for connected accounts
   function showFakeNotification() {
-    const types = ['Saving', 'Current', 'Corporate'];
-    const accountType = types[Math.floor(Math.random() * types.length)];
+    if (connectedAccounts.length === 0) return;
+
+    const accountType = connectedAccounts[Math.floor(Math.random() * connectedAccounts.length)];
     const amount = getRandomAmount(accountType);
     const commission = Math.round(amount * 0.03);
     const netAmount = amount - commission;
