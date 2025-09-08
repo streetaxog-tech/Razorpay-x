@@ -2,185 +2,203 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8" />
+    <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>Razorpay Premium Panel</title>
-
-    <!-- Favicon & Logo -->
-    <link rel="icon" href="logo.png.jpg" type="image/png">
-
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-analytics-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
-
-    <script>
-        const firebaseConfig = {
-            apiKey: "AIzaSyAbYNks_Wbc5ta1DVxK677IUJro28_Xps8",
-            authDomain: "razorpay-panels.firebaseapp.com",
-            projectId: "razorpay-panels",
-            storageBucket: "razorpay-panels.firebasestorage.app",
-            messagingSenderId: "414111056846",
-            appId: "1:414111056846:web:c0890b7d6a65e416d8e19f",
-            measurementId: "G-2JBK6VNVK2"
-        };
-        firebase.initializeApp(firebaseConfig);
-        firebase.analytics();
-    </script>
-
+    <title>Premium Gateway Panel</title>
+    <link rel="icon" href="logo.png.jpg" type="image/png"/>
     <style>
         body {
             font-family: 'Arial', sans-serif;
-            background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
-            color: #fff;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
+            background: #121212;
+            color: #e0e0e0;
             margin: 0;
+            padding: 20px;
         }
 
         .container {
-            background-color: rgba(0,0,0,0.9);
-            padding: 30px;
-            border-radius: 15px;
-            max-width: 450px;
-            width: 100%;
-            text-align: center;
+            max-width: 1000px;
+            margin: auto;
+        }
+
+        header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 40px;
         }
 
         h1 {
-            margin-bottom: 20px;
+            font-size: 2rem;
+            color: #00d4ff;
         }
 
-        input, select, button {
-            width: 100%;
-            padding: 12px;
-            margin: 10px 0;
-            border-radius: 8px;
+        input, button {
+            padding: 10px;
+            border-radius: 6px;
             border: none;
-            font-size: 16px;
+            margin: 8px 0;
+            width: 100%;
+            font-size: 1rem;
         }
 
         button {
-            background-color: #4CAF50;
-            color: white;
+            background: #00d4ff;
+            color: #121212;
+            font-weight: bold;
             cursor: pointer;
         }
 
-        .notification {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background: #333;
-            color: #fff;
-            padding: 15px;
-            border-radius: 10px;
-            display: none;
-            box-shadow: 0 0 10px #000;
+        .card {
+            background: #1f1f2e;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
         }
 
-        #earnings {
-            font-size: 20px;
+        table {
+            width: 100%;
+            border-collapse: collapse;
             margin-top: 20px;
+        }
+
+        table th, table td {
+            padding: 12px;
+            border-bottom: 1px solid #444;
+        }
+
+        .notification {
+            background: #333;
+            color: #fff;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 10px;
         }
     </style>
 </head>
 
 <body>
-    <div class="container" id="login-section">
-        <h1>Login to Razorpay Panel</h1>
-        <input type="email" id="email" placeholder="Email" required />
-        <input type="password" id="password" placeholder="Password" required />
-        <button onclick="login()">Login</button>
+
+    <div class="container">
+        <header>
+            <h1>Premium Gateway Panel</h1>
+        </header>
+
+        <div id="login-section" class="card">
+            <h2>Login</h2>
+            <input type="email" id="email" placeholder="Email" value="mithunchauhan16964@gmail.com"/>
+            <input type="password" id="password" placeholder="Password" value="@12345"/>
+            <button onclick="login()">Login</button>
+        </div>
+
+        <div id="dashboard-section" style="display: none;">
+            <div class="card">
+                <h2>Welcome, <span id="user-email"></span></h2>
+                <h3>Total Earnings: ₹<span id="total-earnings">0.00</span></h3>
+            </div>
+
+            <div class="card">
+                <h3>Add Bank Account</h3>
+                <input type="text" id="account-name" placeholder="Account Name"/>
+                <input type="text" id="ifsc" placeholder="IFSC Code"/>
+                <input type="text" id="account-number" placeholder="Account Number"/>
+                <button onclick="addBankAccount()">Add Account</button>
+            </div>
+
+            <div class="card">
+                <h3>Manual Payout</h3>
+                <input type="number" id="payout-amount" placeholder="Payout Amount"/>
+                <button onclick="processPayout()">Process Payout</button>
+            </div>
+
+            <div class="card">
+                <h3>Transaction Log</h3>
+                <button onclick="exportCSV()">Export CSV</button>
+                <table>
+                    <thead>
+                        <tr><th>Date</th><th>Account</th><th>Amount (₹)</th></tr>
+                    </thead>
+                    <tbody id="transaction-log"></tbody>
+                </table>
+            </div>
+        </div>
     </div>
-
-    <div class="container" id="dashboard-section" style="display:none;">
-        <h1>Welcome to Premium Razorpay Panel</h1>
-
-        <input type="text" id="acc-holder" placeholder="Account Holder Name" required />
-        <input type="text" id="acc-number" placeholder="Account Number" required />
-        <input type="text" id="ifsc" placeholder="IFSC Code" required />
-
-        <select id="acc-type">
-            <option value="saving">Saving Account</option>
-            <option value="current">Current Account</option>
-            <option value="corporate">Corporate Account</option>
-        </select>
-
-        <button onclick="addAccount()">Add Bank Account</button>
-
-        <h3>Your Earnings</h3>
-        <div id="earnings">₹0.00</div>
-    </div>
-
-    <div class="notification" id="notification"></div>
 
     <script>
-        const validUsers = [
-            { email: "mithunchauhan16964@gmail.com", password: "@12345" },
-            { email: "pagalnafar1696@gmail.com", password: "ayan@123" }
-        ];
-
         let totalEarnings = 0;
+        let transactionHistory = [];
 
         function login() {
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
 
-            const user = validUsers.find(u => u.email === email && u.password === password);
-
-            if (user) {
+            if (email === 'mithunchauhan16964@gmail.com' && password === '@12345') {
                 document.getElementById('login-section').style.display = 'none';
                 document.getElementById('dashboard-section').style.display = 'block';
+                document.getElementById('user-email').innerText = email;
                 Notification.requestPermission();
             } else {
-                alert('Invalid credentials!');
+                alert('Invalid credentials');
             }
         }
 
-        function addAccount() {
-            const holder = document.getElementById('acc-holder').value;
-            const accNumber = document.getElementById('acc-number').value;
+        function addBankAccount() {
+            const name = document.getElementById('account-name').value;
             const ifsc = document.getElementById('ifsc').value;
-            const type = document.getElementById('acc-type').value;
+            const accNum = document.getElementById('account-number').value;
 
-            if (holder && accNumber && ifsc) {
-                startNotifications(type);
-            } else {
-                alert('Please complete all fields.');
+            if (!name || !ifsc || !accNum) {
+                alert('Please fill all fields');
+                return;
             }
+
+            simulateDepositNotifications(name);
+            alert('Bank Account added successfully');
         }
 
-        function startNotifications(type) {
+        function simulateDepositNotifications(accountName) {
             setInterval(() => {
-                let min, max, commissionRate;
+                const amount = Math.floor(Math.random() * (1000 - 100 + 1)) + 100;
+                totalEarnings += amount;
+                document.getElementById('total-earnings').innerText = totalEarnings.toFixed(2);
 
-                if (type === 'saving') {
-                    min = 100;
-                    max = 1000;
-                    commissionRate = 3;
-                } else if (type === 'current') {
-                    min = 1000;
-                    max = 10000;
-                    commissionRate = 5;
-                } else if (type === 'corporate') {
-                    min = 5000;
-                    max = 50000;
-                    commissionRate = 15;
-                }
+                const now = new Date().toLocaleString();
+                transactionHistory.push({ date: now, account: accountName, amount });
 
-                const amount = Math.floor(Math.random() * (max - min + 1) + min);
-                totalEarnings += (amount * commissionRate) / 100;
-                document.getElementById('earnings').innerText = `₹${totalEarnings.toFixed(2)}`;
+                const row = `<tr><td>${now}</td><td>${accountName}</td><td>₹${amount}</td></tr>`;
+                document.getElementById('transaction-log').innerHTML = row + document.getElementById('transaction-log').innerHTML;
 
-                if (Notification.permission === 'granted') {
-                    new Notification('New Payment Credited', {
-                        body: `${type.charAt(0).toUpperCase() + type.slice(1)} Account: ₹${amount} credited.`,
-                        icon: 'logo.png.jpg'
-                    });
-                }
-            }, 4000);
+                new Notification('Bank Deposit', {
+                    body: `₹${amount} credited to ${accountName}`,
+                    icon: 'logo.png.jpg'
+                });
+
+            }, 5000);  // Every 5 seconds as shown in your video
+        }
+
+        function processPayout() {
+            const payoutAmount = parseFloat(document.getElementById('payout-amount').value);
+
+            if (isNaN(payoutAmount) || payoutAmount <= 0 || payoutAmount > totalEarnings) {
+                alert('Invalid payout amount');
+                return;
+            }
+
+            totalEarnings -= payoutAmount;
+            document.getElementById('total-earnings').innerText = totalEarnings.toFixed(2);
+            alert(`Payout of ₹${payoutAmount} processed successfully`);
+        }
+
+        function exportCSV() {
+            let csv = "Date,Account,Amount\n";
+            transactionHistory.forEach(tx => {
+                csv += `"${tx.date}","${tx.account}",${tx.amount}\n`;
+            });
+
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'transactions.csv';
+            link.click();
         }
     </script>
 </body>
