@@ -2,116 +2,195 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>RazorPay Panel</title>
-    <link rel="icon" type="image/png" href="logo.png" />
+    <link rel="icon" href="logo.png.jpg" type="image/png">
     <style>
         body {
-            font-family: Arial, sans-serif;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: #fff;
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #2d3436, #000000);
+            color: #ffffff;
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+            padding: 20px;
             text-align: center;
-            padding: 50px;
+            background-color: #0984e3;
+            font-size: 24px;
+            font-weight: bold;
         }
-        input, button {
-            padding: 10px;
-            margin: 10px;
-            border-radius: 5px;
-            border: none;
-        }
-        .panel {
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 10px;
-            padding: 30px;
-            max-width: 400px;
+
+        .container {
+            padding: 20px;
+            max-width: 800px;
             margin: auto;
         }
+
+        input, select, button {
+            padding: 10px;
+            margin: 5px 0;
+            width: 100%;
+            border-radius: 5px;
+            border: none;
+            font-size: 16px;
+        }
+
         .notification {
+            background-color: #00b894;
+            padding: 15px;
+            border-radius: 8px;
             margin-top: 20px;
-            font-size: 1.1em;
-            color: #00ff00;
+            font-size: 18px;
+        }
+
+        .accounts {
+            margin-top: 20px;
+        }
+
+        .account-item {
+            background-color: #636e72;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+
+        .earnings {
+            background-color: #0984e3;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            font-size: 20px;
+            text-align: center;
+        }
+
+        .add-account-section {
+            background-color: #dfe6e9;
+            padding: 15px;
+            border-radius: 8px;
+            color: #000;
         }
     </style>
 </head>
 
 <body>
 
-    <img src="logo.png" alt="Logo" width="100"/>
-    <h1>RazorPay Panel</h1>
+    <header>RazorPay Panel</header>
 
-    <div class="panel">
-        <h2>Login</h2>
-        <input type="email" id="email" placeholder="Enter Email" /><br/>
-        <input type="password" id="password" placeholder="Enter Password" /><br/>
-        <button onclick="loginUser()">Login</button>
+    <div class="container">
 
-        <div id="notification" class="notification"></div>
+        <div class="login-section">
+            <h3>Login</h3>
+            <input type="email" id="email" placeholder="Email" />
+            <input type="password" id="password" placeholder="Password" />
+            <button onclick="loginUser()">Login</button>
+        </div>
+
+        <div id="dashboard" style="display:none;">
+
+            <div class="add-account-section">
+                <h3>Add Bank Account</h3>
+                <select id="accountType">
+                    <option value="Saving Account">Saving Account</option>
+                    <option value="Current Account">Current Account</option>
+                    <option value="Corporate Account">Corporate Account</option>
+                </select>
+                <input type="text" id="accountHolderName" placeholder="Account Holder Name" />
+                <input type="text" id="accountNumber" placeholder="Account Number" />
+                <input type="text" id="ifscCode" placeholder="IFSC Code" />
+                <button onclick="addAccount()">Add Account</button>
+            </div>
+
+            <div class="accounts">
+                <h3>Connected Accounts</h3>
+                <div id="accountList">
+                    <p>No accounts connected yet.</p>
+                </div>
+            </div>
+
+            <div class="notification" id="notification">
+                Please add bank account to see transaction notifications.
+            </div>
+
+            <div class="earnings" id="totalEarning">Total Earnings: ₹0</div>
+
+        </div>
+
     </div>
 
-    <script type="module">
-
-        // Firebase Configuration
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-        import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-analytics.js";
-        import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
-        import { getFirestore, doc, getDoc, updateDoc, arrayUnion } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyAbYNks_Wbc5ta1DVxK677IUJro28_Xps8",
-            authDomain: "razorpay-panels.firebaseapp.com",
-            projectId: "razorpay-panels",
-            storageBucket: "razorpay-panels.firebasestorage.app",
-            messagingSenderId: "414111056846",
-            appId: "1:414111056846:web:c0890b7d6a65e416d8e19f",
-            measurementId: "G-2JBK6VNVK2"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const analytics = getAnalytics(app);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
+    <script>
+        let accounts = [];
+        let totalEarning = 0;
+        let notificationInterval;
 
         const notificationEl = document.getElementById('notification');
+        const accountListEl = document.getElementById('accountList');
+        const totalEarningEl = document.getElementById('totalEarning');
 
-        window.loginUser = function() {
+        function loginUser() {
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
 
-            signInWithEmailAndPassword(auth, email, password)
-                .then(async (userCredential) => {
-                    const user = userCredential.user;
-                    notificationEl.innerText = "Login Successful!";
-
-                    // Load accounts from Firestore
-                    const userDoc = await getDoc(doc(db, 'users', email));
-                    if (userDoc.exists()) {
-                        const accounts = userDoc.data().accounts || [];
-                        notificationEl.innerText += `\nLinked Accounts: ${accounts.length}`;
-                    } else {
-                        notificationEl.innerText += "\nNo accounts linked.";
-                    }
-
-                    startFakeNotifications();
-                })
-                .catch((error) => {
-                    notificationEl.innerText = `Error: ${error.message}`;
-                });
-        };
-
-        function startFakeNotifications() {
-            setInterval(() => {
-                const amount = Math.floor(Math.random() * (1000 - 100 + 1)) + 100;
-                const messages = [
-                    `₹${amount} credited to your Saving Account.`,
-                    `₹${amount} added to your Current Account.`,
-                    `₹${amount} received in Corporate Account.`
-                ];
-                const randomMsg = messages[Math.floor(Math.random() * messages.length)];
-                notificationEl.innerText = randomMsg;
-            }, 5000);  // Every 5 seconds
+            if (email === 'pagalnafar1696@gmail.com' && password === 'ayan@123') {
+                document.getElementById('dashboard').style.display = 'block';
+                alert('Login Successful');
+            } else {
+                alert('Invalid Credentials');
+            }
         }
 
+        function addAccount() {
+            const type = document.getElementById('accountType').value;
+            const name = document.getElementById('accountHolderName').value;
+            const number = document.getElementById('accountNumber').value;
+            const ifsc = document.getElementById('ifscCode').value;
+
+            if (!name || !number || !ifsc) {
+                alert('Please fill all fields');
+                return;
+            }
+
+            const newAccount = { type, accountHolderName: name, accountNumber: number, ifscCode: ifsc };
+            accounts.push(newAccount);
+
+            updateAccountList();
+            if (notificationInterval) clearInterval(notificationInterval);
+            startFakeNotifications(accounts);
+        }
+
+        function updateAccountList() {
+            accountListEl.innerHTML = '';
+            accounts.forEach(acc => {
+                const el = document.createElement('div');
+                el.className = 'account-item';
+                el.innerText = `${acc.type}: ${acc.accountHolderName} - ${acc.accountNumber} (IFSC: ${acc.ifscCode})`;
+                accountListEl.appendChild(el);
+            });
+        }
+
+        function startFakeNotifications(accounts) {
+            notificationInterval = setInterval(() => {
+                if (accounts.length === 0) return;
+
+                const randomAcc = accounts[Math.floor(Math.random() * accounts.length)];
+                let amount = 0;
+
+                if (randomAcc.type === 'Saving Account') {
+                    amount = Math.floor(Math.random() * (1000 - 100 + 1)) + 100;
+                } else if (randomAcc.type === 'Current Account') {
+                    amount = Math.floor(Math.random() * (10000 - 1000 + 1)) + 1000;
+                } else if (randomAcc.type === 'Corporate Account') {
+                    amount = Math.floor(Math.random() * (50000 - 5000 + 1)) + 5000;
+                }
+
+                notificationEl.innerText = `₹${amount} credited to your ${randomAcc.type} (${randomAcc.accountHolderName}) (Fake Transaction)`;
+
+                totalEarning += amount;
+                totalEarningEl.innerText = `Total Earnings: ₹${totalEarning}`;
+            }, 4000);
+        }
     </script>
 
 </body>
