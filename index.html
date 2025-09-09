@@ -2,205 +2,105 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>Premium Gateway Panel</title>
-    <link rel="icon" href="logo.png.jpg" type="image/png"/>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RazorPay Payment Gateway Panel</title>
+    <link rel="icon" href="logo.png.jpg">
     <style>
         body {
             font-family: 'Arial', sans-serif;
-            background: #121212;
-            color: #e0e0e0;
-            margin: 0;
+            background: linear-gradient(135deg, #f5f7fa, #c3cfe2);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
             padding: 20px;
         }
 
-        .container {
-            max-width: 1000px;
-            margin: auto;
-        }
-
-        header {
+        .header {
             display: flex;
             align-items: center;
-            justify-content: space-between;
-            margin-bottom: 40px;
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+
+        .header img {
+            width: 50px;
         }
 
         h1 {
-            font-size: 2rem;
-            color: #00d4ff;
+            color: #333;
         }
 
-        input, button {
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        input {
             padding: 10px;
-            border-radius: 6px;
-            border: none;
-            margin: 8px 0;
-            width: 100%;
-            font-size: 1rem;
+            width: 300px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
         }
 
         button {
-            background: #00d4ff;
-            color: #121212;
-            font-weight: bold;
+            padding: 10px 20px;
+            background-color: #0057ff;
+            color: white;
+            border: none;
+            border-radius: 5px;
             cursor: pointer;
         }
 
-        .card {
-            background: #1f1f2e;
-            padding: 20px;
-            border-radius: 12px;
-            margin-bottom: 20px;
+        button:hover {
+            background-color: #003fbb;
         }
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
+        .account-list {
+            margin-top: 30px;
+            width: 80%;
+            max-width: 600px;
         }
 
-        table th, table td {
-            padding: 12px;
-            border-bottom: 1px solid #444;
-        }
-
-        .notification {
-            background: #333;
-            color: #fff;
-            padding: 12px;
-            border-radius: 8px;
+        .account-item {
+            background-color: white;
+            padding: 15px;
             margin-bottom: 10px;
+            border-radius: 10px;
+            box-shadow: 0px 2px 5px rgba(0,0,0,0.1);
         }
     </style>
 </head>
 
 <body>
-
-    <div class="container">
-        <header>
-            <h1>Premium Gateway Panel</h1>
-        </header>
-
-        <div id="login-section" class="card">
-            <h2>Login</h2>
-            <input type="email" id="email" placeholder="Email" value="mithunchauhan16964@gmail.com"/>
-            <input type="password" id="password" placeholder="Password" value="@12345"/>
-            <button onclick="login()">Login</button>
-        </div>
-
-        <div id="dashboard-section" style="display: none;">
-            <div class="card">
-                <h2>Welcome, <span id="user-email"></span></h2>
-                <h3>Total Earnings: ₹<span id="total-earnings">0.00</span></h3>
-            </div>
-
-            <div class="card">
-                <h3>Add Bank Account</h3>
-                <input type="text" id="account-name" placeholder="Account Name"/>
-                <input type="text" id="ifsc" placeholder="IFSC Code"/>
-                <input type="text" id="account-number" placeholder="Account Number"/>
-                <button onclick="addBankAccount()">Add Account</button>
-            </div>
-
-            <div class="card">
-                <h3>Manual Payout</h3>
-                <input type="number" id="payout-amount" placeholder="Payout Amount"/>
-                <button onclick="processPayout()">Process Payout</button>
-            </div>
-
-            <div class="card">
-                <h3>Transaction Log</h3>
-                <button onclick="exportCSV()">Export CSV</button>
-                <table>
-                    <thead>
-                        <tr><th>Date</th><th>Account</th><th>Amount (₹)</th></tr>
-                    </thead>
-                    <tbody id="transaction-log"></tbody>
-                </table>
-            </div>
-        </div>
+    <div class="header">
+        <img src="logo.png.jpg" alt="Logo">
+        <h1>RazorPay Payment Panel</h1>
     </div>
 
-    <script>
-        let totalEarnings = 0;
-        let transactionHistory = [];
+    <button id="enable-notifications">Enable Notifications</button>
 
-        function login() {
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
+    <h2>Add Bank Account</h2>
+    <div>
+        <div class="form-group">
+            <input type="text" id="account-type" placeholder="Account Type (Saving/Current/Corporate)">
+        </div>
+        <div class="form-group">
+            <input type="text" id="account-name" placeholder="Account Holder Name">
+        </div>
+        <div class="form-group">
+            <input type="text" id="account-number" placeholder="Account Number">
+        </div>
+        <div class="form-group">
+            <input type="text" id="ifsc" placeholder="IFSC Code">
+        </div>
+        <button id="add-account">Add Account</button>
+    </div>
 
-            if (email === 'mithunchauhan16964@gmail.com' && password === '@12345') {
-                document.getElementById('login-section').style.display = 'none';
-                document.getElementById('dashboard-section').style.display = 'block';
-                document.getElementById('user-email').innerText = email;
-                Notification.requestPermission();
-            } else {
-                alert('Invalid credentials');
-            }
-        }
+    <div class="account-list" id="account-list"></div>
 
-        function addBankAccount() {
-            const name = document.getElementById('account-name').value;
-            const ifsc = document.getElementById('ifsc').value;
-            const accNum = document.getElementById('account-number').value;
-
-            if (!name || !ifsc || !accNum) {
-                alert('Please fill all fields');
-                return;
-            }
-
-            simulateDepositNotifications(name);
-            alert('Bank Account added successfully');
-        }
-
-        function simulateDepositNotifications(accountName) {
-            setInterval(() => {
-                const amount = Math.floor(Math.random() * (1000 - 100 + 1)) + 100;
-                totalEarnings += amount;
-                document.getElementById('total-earnings').innerText = totalEarnings.toFixed(2);
-
-                const now = new Date().toLocaleString();
-                transactionHistory.push({ date: now, account: accountName, amount });
-
-                const row = `<tr><td>${now}</td><td>${accountName}</td><td>₹${amount}</td></tr>`;
-                document.getElementById('transaction-log').innerHTML = row + document.getElementById('transaction-log').innerHTML;
-
-                new Notification('Bank Deposit', {
-                    body: `₹${amount} credited to ${accountName}`,
-                    icon: 'logo.png.jpg'
-                });
-
-            }, 5000);  // Every 5 seconds as shown in your video
-        }
-
-        function processPayout() {
-            const payoutAmount = parseFloat(document.getElementById('payout-amount').value);
-
-            if (isNaN(payoutAmount) || payoutAmount <= 0 || payoutAmount > totalEarnings) {
-                alert('Invalid payout amount');
-                return;
-            }
-
-            totalEarnings -= payoutAmount;
-            document.getElementById('total-earnings').innerText = totalEarnings.toFixed(2);
-            alert(`Payout of ₹${payoutAmount} processed successfully`);
-        }
-
-        function exportCSV() {
-            let csv = "Date,Account,Amount\n";
-            transactionHistory.forEach(tx => {
-                csv += `"${tx.date}","${tx.account}",${tx.amount}\n`;
-            });
-
-            const blob = new Blob([csv], { type: 'text/csv' });
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(blob);
-            link.download = 'transactions.csv';
-            link.click();
-        }
-    </script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-messaging-compat.js"></script>
+    <script src="app.js"></script>
 </body>
 
 </html>
