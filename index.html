@@ -1,272 +1,184 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>Premium Gateway Panel</title>
-    <link rel="icon" href="logo.png.jpg" type="image/png"/>
-    <style>
-        body {
-            font-family: 'Arial', sans-serif;
-            background: #121212;
-            color: #e0e0e0;
-            margin: 0;
-            padding: 20px;
-        }
-
-        .container {
-            max-width: 1000px;
-            margin: auto;
-        }
-
-        header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 40px;
-        }
-
-        h1 {
-            font-size: 2rem;
-            color: #00d4ff;
-        }
-
-        input, button {
-            padding: 10px;
-            border-radius: 6px;
-            border: none;
-            margin: 8px 0;
-            width: 100%;
-            font-size: 1rem;
-        }
-
-        button {
-            background: #00d4ff;
-            color: #121212;
-            font-weight: bold;
-            cursor: pointer;
-        }
-
-        .card {
-            background: #1f1f2e;
-            padding: 20px;
-            border-radius: 12px;
-            margin-bottom: 20px;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-
-        table th, table td {
-            padding: 12px;
-            border-bottom: 1px solid #444;
-        }
-
-        /* Notification container for stacking */
-        #notifications-container {
-            position: fixed;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            z-index: 9999;
-        }
-
-        .custom-notification {
-            background: #1f1f2e;
-            color: #fff;
-            padding: 12px 16px;
-            border-radius: 10px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            max-width: 300px;
-            font-size: 0.9rem;
-            animation: slide-down 0.5s;
-        }
-
-        .custom-notification img {
-            width: 40px;
-            height: 40px;
-            border-radius: 8px;
-        }
-
-        .notif-content {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .notif-amount {
-            font-weight: bold;
-            font-size: 1rem;
-        }
-
-        .notif-text {
-            font-size: 0.85rem;
-            color: #ccc;
-        }
-
-        @keyframes slide-down {
-            from { transform: translateY(-100%); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
-        }
-    </style>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Premium Gateway Panel</title>
+<link rel="icon" href="logo.png" type="image/png"/>
+<style>
+body { font-family:'Arial', sans-serif; background:#121212; color:#e0e0e0; margin:0; padding:20px; }
+.container { max-width:1000px; margin:auto; }
+header { display:flex; align-items:center; justify-content:space-between; margin-bottom:40px; }
+h1 { font-size:2rem; color:#00d4ff; }
+input, button, select { padding:10px; border-radius:6px; border:none; margin:8px 0; width:100%; font-size:1rem; }
+button { background:#00d4ff; color:#121212; font-weight:bold; cursor:pointer; }
+.card { background:#1f1f2e; padding:20px; border-radius:12px; margin-bottom:20px; }
+table { width:100%; border-collapse:collapse; margin-top:20px; }
+table th, table td { padding:12px; border-bottom:1px solid #444; }
+/* Notifications */
+#notifications-container { position:fixed; top:20px; left:50%; transform:translateX(-50%); display:flex; flex-direction:column; gap:12px; z-index:9999; }
+.custom-notification { padding:16px 20px; border-radius:15px; box-shadow:0 6px 20px rgba(0,0,0,0.5); display:flex; align-items:center; gap:16px; max-width:380px; font-size:1rem; animation:slide-down 0.5s; color:#fff; }
+.custom-notification img { width:50px; height:50px; border-radius:10px; }
+.notif-content { display:flex; flex-direction:column; }
+.notif-amount { font-weight:bold; font-size:1.2rem; }
+.notif-text { font-size:0.9rem; color:#ccc; }
+.deposit { background-color:#00c853; } /* green */
+.payout { background-color:#d50000; } /* red */
+@keyframes slide-down { from { transform:translateY(-100%); opacity:0; } to { transform:translateY(0); opacity:1; } }
+</style>
 </head>
-
 <body>
-
 <div class="container">
-    <header>
-        <h1>Premium Gateway Panel</h1>
-    </header>
+<header><h1>Premium Gateway Panel</h1></header>
 
-    <div id="login-section" class="card">
-        <h2>Login</h2>
-        <input type="email" id="email" placeholder="Email" value="mithunchauhan16964@gmail.com"/>
-        <input type="password" id="password" placeholder="Password" value="@12345"/>
-        <button onclick="login()">Login</button>
-    </div>
-
-    <div id="dashboard-section" style="display: none;">
-        <div class="card">
-            <h2>Welcome, <span id="user-email"></span></h2>
-            <h3>Total Earnings: ₹<span id="total-earnings">0.00</span></h3>
-        </div>
-
-        <div class="card">
-            <h3>Add Bank Account</h3>
-            <input type="text" id="account-name" placeholder="Account Name"/>
-            <input type="text" id="ifsc" placeholder="IFSC Code"/>
-            <input type="text" id="account-number" placeholder="Account Number"/>
-            <button onclick="addBankAccount()">Add Account</button>
-        </div>
-
-        <div class="card">
-            <h3>Manual Payout</h3>
-            <input type="number" id="payout-amount" placeholder="Payout Amount"/>
-            <button onclick="processPayout()">Process Payout</button>
-        </div>
-
-        <div class="card">
-            <h3>Transaction Log</h3>
-            <button onclick="exportCSV()">Export CSV</button>
-            <table>
-                <thead>
-                    <tr><th>Date</th><th>Account</th><th>Amount (₹)</th></tr>
-                </thead>
-                <tbody id="transaction-log"></tbody>
-            </table>
-        </div>
-    </div>
+<div id="login-section" class="card">
+<h2>Login</h2>
+<input type="email" id="email" placeholder="Email" value="mithunchauhan16964@gmail.com"/>
+<input type="password" id="password" placeholder="Password" value="@12345"/>
+<button onclick="login()">Login</button>
 </div>
 
-<!-- Notifications Container -->
+<div id="dashboard-section" style="display:none;">
+<div class="card">
+<h2>Welcome, <span id="user-email"></span></h2>
+<h3>Total Earnings: ₹<span id="total-earnings">0.00</span></h3>
+</div>
+
+<!-- Bank Account Form -->
+<div class="card">
+<h3>Add Bank Account</h3>
+<input type="text" id="bank-name" placeholder="Bank Name"/>
+<input type="text" id="account-number" placeholder="Bank Account Number"/>
+<input type="text" id="ifsc" placeholder="IFSC Code"/>
+<input type="text" id="account-holder" placeholder="Account Holder Name"/>
+<input type="text" id="phone" placeholder="Phone Number"/>
+<input type="text" id="linkid" placeholder="Link ID with Bank"/>
+<select id="account-type">
+<option value="Current">Current</option>
+<option value="Corporate Saving">Corporate Saving</option>
+<option value="Saving">Saving</option>
+</select>
+<button onclick="addBankAccount()">Add Account</button>
+</div>
+
+<div class="card">
+<h3>Manual Payout</h3>
+<input type="number" id="payout-amount" placeholder="Payout Amount"/>
+<button onclick="processPayout()">Process Payout</button>
+</div>
+
+<div class="card">
+<h3>Transaction Log</h3>
+<button onclick="exportCSV()">Export CSV</button>
+<table>
+<thead>
+<tr><th>Date</th><th>Account</th><th>Amount (₹)</th></tr>
+</thead>
+<tbody id="transaction-log"></tbody>
+</table>
+</div>
+</div>
+</div>
+
 <div id="notifications-container"></div>
 
 <script>
-    let totalEarnings = 0;
-    let transactionHistory = [];
-    let bankAccounts = [];
+let totalEarnings=0;
+let transactionHistory=[];
+let bankAccounts=[];
 
-    function login() {
-        const email = document.getElementById('email').value;
-        const password = document.getElementById('password').value;
+function login(){
+    const email=document.getElementById('email').value;
+    const password=document.getElementById('password').value;
+    if(email==='mithunchauhan16964@gmail.com' && password==='@12345'){
+        document.getElementById('login-section').style.display='none';
+        document.getElementById('dashboard-section').style.display='block';
+        document.getElementById('user-email').innerText=email;
+    } else alert('Invalid credentials');
+}
 
-        if (email === 'mithunchauhan16964@gmail.com' && password === '@12345') {
-            document.getElementById('login-section').style.display = 'none';
-            document.getElementById('dashboard-section').style.display = 'block';
-            document.getElementById('user-email').innerText = email;
-        } else {
-            alert('Invalid credentials');
-        }
-    }
+function addBankAccount(){
+    const bankName=document.getElementById('bank-name').value;
+    const accountNumber=document.getElementById('account-number').value;
+    const ifsc=document.getElementById('ifsc').value;
+    const accountHolder=document.getElementById('account-holder').value;
+    const phone=document.getElementById('phone').value;
+    const linkid=document.getElementById('linkid').value;
+    const accountType=document.getElementById('account-type').value;
 
-    function addBankAccount() {
-        const name = document.getElementById('account-name').value;
-        const ifsc = document.getElementById('ifsc').value;
-        const accNum = document.getElementById('account-number').value;
+    if(!bankName||!accountNumber||!ifsc||!accountHolder||!phone||!linkid){ alert('Please fill all fields'); return; }
 
-        if (!name || !ifsc || !accNum) {
-            alert('Please fill all fields');
-            return;
-        }
+    const accountDisplay=`${bankName} (${accountNumber}) [${accountType}]`;
+    bankAccounts.push(accountDisplay);
 
-        bankAccounts.push(name);
-        startNotifications(name);
-        alert('Bank Account added successfully');
-    }
+    startNotifications(accountDisplay, bankName);
+    alert('Bank Account added successfully');
+}
 
-    function startNotifications(accountName) {
-        setInterval(() => {
-            const amount = Math.floor(Math.random() * (1000 - 100 + 1)) + 100;
-            totalEarnings += amount;
-            document.getElementById('total-earnings').innerText = totalEarnings.toFixed(2);
+function startNotifications(accountName, bankName){
+    setInterval(()=>{
+        const amount=Math.floor(Math.random()*(1000-100+1))+100;
+        totalEarnings+=amount;
+        document.getElementById('total-earnings').innerText=totalEarnings.toFixed(2);
 
-            const now = new Date().toLocaleString();
-            transactionHistory.push({ date: now, account: accountName, amount });
+        const now=new Date().toLocaleString();
+        transactionHistory.push({date:now, account:accountName, amount});
 
-            const row = `<tr><td>${now}</td><td>${accountName}</td><td>₹${amount}</td></tr>`;
-            document.getElementById('transaction-log').innerHTML = row + document.getElementById('transaction-log').innerHTML;
+        const row=`<tr><td>${now}</td><td>${accountName}</td><td>₹${amount}</td></tr>`;
+        document.getElementById('transaction-log').innerHTML=row+document.getElementById('transaction-log').innerHTML;
 
-            showCustomNotification(accountName, amount, now);
-        }, 2000);
-    }
+        showCustomNotification(accountName, amount, now, 'deposit', bankName);
+    },2000);
+}
 
-    function showCustomNotification(accountName, amount, time) {
-        const container = document.getElementById('notifications-container');
+function showCustomNotification(accountName, amount, time, type='deposit', bankName=''){
+    const container=document.getElementById('notifications-container');
+    const clientPercent=70;
+    const clientAmount=Math.round(amount*clientPercent/100);
 
-        const notif = document.createElement('div');
-        notif.classList.add('custom-notification');
+    // Use bank logo if exists
+    let logoSrc=bankName?`${bankName}.png`:'logo.png';
 
-        notif.innerHTML = `
-            <img src="logo.gif" alt="Notification"/>
-            <div class="notif-content">
-                <span class="notif-amount">₹${amount} credited</span>
-                <span class="notif-text">${accountName} • ${time}</span>
-            </div>
-        `;
+    const notif=document.createElement('div');
+    notif.classList.add('custom-notification', type);
+    notif.innerHTML=`
+        <img src="${logoSrc}" alt="Notification"/>
+        <div class="notif-content">
+            <span class="notif-amount">₹${amount} ${type==='deposit'?'credited':'paid out'}</span>
+            <span class="notif-text">${accountName} • ${time}</span>
+            ${type==='deposit'?`<span class="notif-text">Client share: ${clientPercent}% (₹${clientAmount})</span>`:''}
+        </div>
+    `;
+    container.prepend(notif);
+    setTimeout(()=>{notif.remove();},3500);
+}
 
-        container.prepend(notif);
+function processPayout(){
+    const payoutAmount=parseFloat(document.getElementById('payout-amount').value);
+    if(isNaN(payoutAmount)||payoutAmount<=0||payoutAmount>totalEarnings){ alert('Invalid payout amount'); return; }
 
-        // remove notification after 3 seconds
-        setTimeout(() => {
-            notif.remove();
-        }, 3000);
-    }
+    totalEarnings-=payoutAmount;
+    document.getElementById('total-earnings').innerText=totalEarnings.toFixed(2);
 
-    function processPayout() {
-        const payoutAmount = parseFloat(document.getElementById('payout-amount').value);
+    const now=new Date().toLocaleString();
+    const accountName="Manual Payout";
+    transactionHistory.push({date:now, account:accountName, amount:-payoutAmount});
 
-        if (isNaN(payoutAmount) || payoutAmount <= 0 || payoutAmount > totalEarnings) {
-            alert('Invalid payout amount');
-            return;
-        }
+    const row=`<tr><td>${now}</td><td>${accountName}</td><td>-₹${payoutAmount}</td></tr>`;
+    document.getElementById('transaction-log').innerHTML=row+document.getElementById('transaction-log').innerHTML;
 
-        totalEarnings -= payoutAmount;
-        document.getElementById('total-earnings').innerText = totalEarnings.toFixed(2);
-        alert(`Payout of ₹${payoutAmount} processed successfully`);
-    }
+    showCustomNotification(accountName, payoutAmount, now, 'payout');
+}
 
-    function exportCSV() {
-        let csv = "Date,Account,Amount\n";
-        transactionHistory.forEach(tx => {
-            csv += `"${tx.date}","${tx.account}",${tx.amount}\n`;
-        });
-
-        const blob = new Blob([csv], { type: 'text/csv' });
-        const link = document.createElement('a');
-        link.href = URL.createObjectURL(blob);
-        link.download = 'transactions.csv';
-        link.click();
-    }
+function exportCSV(){
+    let csv="Date,Account,Amount\n";
+    transactionHistory.forEach(tx=>{csv+=`"${tx.date}","${tx.account}",${tx.amount}\n`;});
+    const blob=new Blob([csv],{type:'text/csv'});
+    const link=document.createElement('a');
+    link.href=URL.createObjectURL(blob);
+    link.download='transactions.csv';
+    link.click();
+}
 </script>
-
 </body>
-    </html>
+</html>
