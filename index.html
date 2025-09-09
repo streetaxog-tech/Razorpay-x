@@ -32,7 +32,7 @@
             color: #00d4ff;
         }
 
-        input, select, button {
+        input, button {
             padding: 10px;
             border-radius: 6px;
             border: none;
@@ -55,36 +55,44 @@
             margin-bottom: 20px;
         }
 
-        .bank-account {
-            border: 1px solid #444;
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        table th, table td {
             padding: 12px;
-            border-radius: 8px;
-            margin-bottom: 10px;
-            position: relative;
+            border-bottom: 1px solid #444;
         }
 
-        .connected {
-            color: #0f0;
-            font-weight: bold;
-        }
-
-        .notification {
-            background: #333;
+        #custom-notification {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #1f1f2e;
             color: #fff;
-            padding: 12px;
-            border-radius: 8px;
-            margin-bottom: 10px;
+            padding: 20px;
+            border-radius: 12px;
+            display: none;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+            animation: slide-in 1s;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            max-width: 350px;
+            z-index: 9999;
         }
 
-        .add-account {
-            background: #444;
-            border-radius: 50%;
-            width: 30px;
-            height: 30px;
-            text-align: center;
-            line-height: 30px;
-            font-size: 24px;
-            cursor: pointer;
+        #custom-notification img {
+            width: 50px;
+            height: 50px;
+            border-radius: 8px;
+        }
+
+        @keyframes slide-in {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
         }
     </style>
 </head>
@@ -93,101 +101,141 @@
 
     <div class="container">
         <header>
-            <h1><img src="logo.png.jpg" alt="Logo" style="width: 40px; vertical-align: middle;"> Premium Gateway Panel</h1>
+            <h1>Premium Gateway Panel</h1>
         </header>
 
         <div id="login-section" class="card">
             <h2>Login</h2>
-            <input type="email" id="email" placeholder="Email"/>
-            <input type="password" id="password" placeholder="Password"/>
+            <input type="email" id="email" placeholder="Email" value="mithunchauhan16964@gmail.com"/>
+            <input type="password" id="password" placeholder="Password" value="@12345"/>
             <button onclick="login()">Login</button>
         </div>
 
         <div id="dashboard-section" style="display: none;">
             <div class="card">
                 <h2>Welcome, <span id="user-email"></span></h2>
+                <h3>Total Earnings: ₹<span id="total-earnings">0.00</span></h3>
             </div>
 
             <div class="card">
-                <h3>Bank Accounts</h3>
-                <div id="bank-accounts-list"></div>
-                <div class="add-account" onclick="addBankAccountForm()">+</div>
+                <h3>Add Bank Account</h3>
+                <input type="text" id="account-name" placeholder="Account Name"/>
+                <input type="text" id="ifsc" placeholder="IFSC Code"/>
+                <input type="text" id="account-number" placeholder="Account Number"/>
+                <button onclick="addBankAccount()">Add Account</button>
+            </div>
+
+            <div class="card">
+                <h3>Manual Payout</h3>
+                <input type="number" id="payout-amount" placeholder="Payout Amount"/>
+                <button onclick="processPayout()">Process Payout</button>
+            </div>
+
+            <div class="card">
+                <h3>Transaction Log</h3>
+                <button onclick="exportCSV()">Export CSV</button>
+                <table>
+                    <thead>
+                        <tr><th>Date</th><th>Account</th><th>Amount (₹)</th></tr>
+                    </thead>
+                    <tbody id="transaction-log"></tbody>
+                </table>
             </div>
         </div>
     </div>
 
+    <!-- Custom Notification -->
+    <div id="custom-notification">
+        <img src="logo.gif" alt="Notification"/>
+        <div>
+            <strong>Bank Deposit</strong><br/>
+            <span id="notif-message">₹0 credited to Account Name</span><br/>
+            <small id="notif-time">Just now</small>
+        </div>
+    </div>
+
     <script>
-        const validEmail = "Demo@gmail.com";
-        const validPassword = "@12345";
-        let bankAccounts = [];
+        let totalEarnings = 0;
+        let transactionHistory = [];
 
         function login() {
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
 
-            if (email === validEmail && password === validPassword) {
+            if (email === 'mithunchauhan16964@gmail.com' && password === '@12345') {
                 document.getElementById('login-section').style.display = 'none';
                 document.getElementById('dashboard-section').style.display = 'block';
                 document.getElementById('user-email').innerText = email;
-                Notification.requestPermission();
             } else {
                 alert('Invalid credentials');
             }
         }
 
-        function addBankAccountForm() {
-            const accountIndex = bankAccounts.length;
-            const formHtml = `
-                <div class="bank-account" id="bank-account-${accountIndex}">
-                    <select id="usage-type-${accountIndex}">
-                        <option value="Collection Card">Collection Card</option>
-                        <option value="Payout Account">Payout Account</option>
-                    </select>
-                    <input type="text" id="bank-name-${accountIndex}" placeholder="Bank Name"/>
-                    <input type="text" id="account-holder-${accountIndex}" placeholder="Account Holder Name"/>
-                    <input type="text" id="account-number-${accountIndex}" placeholder="Account Number"/>
-                    <input type="text" id="ifsc-${accountIndex}" placeholder="IFSC Code"/>
-                    <input type="text" id="mobile-${accountIndex}" placeholder="Mobile Number"/>
-                    <select id="account-type-${accountIndex}">
-                        <option value="Saving">Saving</option>
-                        <option value="Current">Current</option>
-                    </select>
-                    <input type="text" id="bank-upi-${accountIndex}" placeholder="Bank UPI"/>
-                    <input type="text" id="username-id-${accountIndex}" placeholder="Username/ID"/>
-                    <input type="password" id="password-${accountIndex}" placeholder="Password"/>
-                    <button onclick="connectAccount(${accountIndex})" id="connect-btn-${accountIndex}">Connect</button>
-                    <span id="status-${accountIndex}"></span>
-                </div>
-            `;
+        function addBankAccount() {
+            const name = document.getElementById('account-name').value;
+            const ifsc = document.getElementById('ifsc').value;
+            const accNum = document.getElementById('account-number').value;
 
-            document.getElementById('bank-accounts-list').insertAdjacentHTML('beforeend', formHtml);
-            bankAccounts.push({ connected: false });
+            if (!name || !ifsc || !accNum) {
+                alert('Please fill all fields');
+                return;
+            }
+
+            simulateDepositNotifications(name);
+            alert('Bank Account added successfully');
         }
 
-        function connectAccount(index) {
-            bankAccounts[index].connected = true;
-            document.getElementById(`status-${index}`).innerHTML = `<span class="connected">Connected</span>`;
-
-            simulateDepositNotifications(index);
-            alert('Bank Account Connected Successfully');
-        }
-
-        function simulateDepositNotifications(index) {
-            const accountName = document.getElementById(`account-holder-${index}`).value || 'Your Account';
-            
+        function simulateDepositNotifications(accountName) {
             setInterval(() => {
                 const amount = Math.floor(Math.random() * (1000 - 100 + 1)) + 100;
+                totalEarnings += amount;
+                document.getElementById('total-earnings').innerText = totalEarnings.toFixed(2);
+
                 const now = new Date().toLocaleString();
+                transactionHistory.push({ date: now, account: accountName, amount });
 
-                new Notification('Bank Deposit', {
-                    body: `₹${amount} credited to ${accountName} at ${now}`,
-                    icon: 'logo.png.jpg'
-                });
+                const row = `<tr><td>${now}</td><td>${accountName}</td><td>₹${amount}</td></tr>`;
+                document.getElementById('transaction-log').innerHTML = row + document.getElementById('transaction-log').innerHTML;
 
-            }, Math.floor(Math.random() * (10000 - 5000 + 1)) + 5000);
+                showCustomNotification(accountName, amount, now);
+            }, 5000);
+        }
+
+        function showCustomNotification(accountName, amount, time) {
+            const notification = document.getElementById('custom-notification');
+            document.getElementById('notif-message').innerText = `₹${amount} credited to ${accountName}`;
+            document.getElementById('notif-time').innerText = time;
+            notification.style.display = 'flex';
+
+            setTimeout(() => { notification.style.display = 'none'; }, 5000);
+        }
+
+        function processPayout() {
+            const payoutAmount = parseFloat(document.getElementById('payout-amount').value);
+
+            if (isNaN(payoutAmount) || payoutAmount <= 0 || payoutAmount > totalEarnings) {
+                alert('Invalid payout amount');
+                return;
+            }
+
+            totalEarnings -= payoutAmount;
+            document.getElementById('total-earnings').innerText = totalEarnings.toFixed(2);
+            alert(`Payout of ₹${payoutAmount} processed successfully`);
+        }
+
+        function exportCSV() {
+            let csv = "Date,Account,Amount\n";
+            transactionHistory.forEach(tx => {
+                csv += `"${tx.date}","${tx.account}",${tx.amount}\n`;
+            });
+
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'transactions.csv';
+            link.click();
         }
     </script>
-
 </body>
 
 </html>
