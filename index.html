@@ -66,176 +66,207 @@
             border-bottom: 1px solid #444;
         }
 
-        #custom-notification {
+        /* Notification container for stacking */
+        #notifications-container {
             position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background: #1f1f2e;
-            color: #fff;
-            padding: 20px;
-            border-radius: 12px;
-            display: none;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
-            animation: slide-in 1s;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
             display: flex;
-            align-items: center;
-            gap: 15px;
-            max-width: 350px;
+            flex-direction: column;
+            gap: 10px;
             z-index: 9999;
         }
 
-        #custom-notification img {
-            width: 50px;
-            height: 50px;
+        .custom-notification {
+            background: #1f1f2e;
+            color: #fff;
+            padding: 12px 16px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            max-width: 300px;
+            font-size: 0.9rem;
+            animation: slide-down 0.5s;
+        }
+
+        .custom-notification img {
+            width: 40px;
+            height: 40px;
             border-radius: 8px;
         }
 
-        @keyframes slide-in {
-            from { transform: translateX(100%); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
+        .notif-content {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .notif-amount {
+            font-weight: bold;
+            font-size: 1rem;
+        }
+
+        .notif-text {
+            font-size: 0.85rem;
+            color: #ccc;
+        }
+
+        @keyframes slide-down {
+            from { transform: translateY(-100%); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
         }
     </style>
 </head>
 
 <body>
 
-    <div class="container">
-        <header>
-            <h1>Premium Gateway Panel</h1>
-        </header>
+<div class="container">
+    <header>
+        <h1>Premium Gateway Panel</h1>
+    </header>
 
-        <div id="login-section" class="card">
-            <h2>Login</h2>
-            <input type="email" id="email" placeholder="Email" value="mithunchauhan16964@gmail.com"/>
-            <input type="password" id="password" placeholder="Password" value="@12345"/>
-            <button onclick="login()">Login</button>
-        </div>
-
-        <div id="dashboard-section" style="display: none;">
-            <div class="card">
-                <h2>Welcome, <span id="user-email"></span></h2>
-                <h3>Total Earnings: ₹<span id="total-earnings">0.00</span></h3>
-            </div>
-
-            <div class="card">
-                <h3>Add Bank Account</h3>
-                <input type="text" id="account-name" placeholder="Account Name"/>
-                <input type="text" id="ifsc" placeholder="IFSC Code"/>
-                <input type="text" id="account-number" placeholder="Account Number"/>
-                <button onclick="addBankAccount()">Add Account</button>
-            </div>
-
-            <div class="card">
-                <h3>Manual Payout</h3>
-                <input type="number" id="payout-amount" placeholder="Payout Amount"/>
-                <button onclick="processPayout()">Process Payout</button>
-            </div>
-
-            <div class="card">
-                <h3>Transaction Log</h3>
-                <button onclick="exportCSV()">Export CSV</button>
-                <table>
-                    <thead>
-                        <tr><th>Date</th><th>Account</th><th>Amount (₹)</th></tr>
-                    </thead>
-                    <tbody id="transaction-log"></tbody>
-                </table>
-            </div>
-        </div>
+    <div id="login-section" class="card">
+        <h2>Login</h2>
+        <input type="email" id="email" placeholder="Email" value="mithunchauhan16964@gmail.com"/>
+        <input type="password" id="password" placeholder="Password" value="@12345"/>
+        <button onclick="login()">Login</button>
     </div>
 
-    <!-- Custom Notification -->
-    <div id="custom-notification">
-        <img src="logo.gif" alt="Notification"/>
-        <div>
-            <strong>Bank Deposit</strong><br/>
-            <span id="notif-message">₹0 credited to Account Name</span><br/>
-            <small id="notif-time">Just now</small>
+    <div id="dashboard-section" style="display: none;">
+        <div class="card">
+            <h2>Welcome, <span id="user-email"></span></h2>
+            <h3>Total Earnings: ₹<span id="total-earnings">0.00</span></h3>
+        </div>
+
+        <div class="card">
+            <h3>Add Bank Account</h3>
+            <input type="text" id="account-name" placeholder="Account Name"/>
+            <input type="text" id="ifsc" placeholder="IFSC Code"/>
+            <input type="text" id="account-number" placeholder="Account Number"/>
+            <button onclick="addBankAccount()">Add Account</button>
+        </div>
+
+        <div class="card">
+            <h3>Manual Payout</h3>
+            <input type="number" id="payout-amount" placeholder="Payout Amount"/>
+            <button onclick="processPayout()">Process Payout</button>
+        </div>
+
+        <div class="card">
+            <h3>Transaction Log</h3>
+            <button onclick="exportCSV()">Export CSV</button>
+            <table>
+                <thead>
+                    <tr><th>Date</th><th>Account</th><th>Amount (₹)</th></tr>
+                </thead>
+                <tbody id="transaction-log"></tbody>
+            </table>
         </div>
     </div>
+</div>
 
-    <script>
-        let totalEarnings = 0;
-        let transactionHistory = [];
+<!-- Notifications Container -->
+<div id="notifications-container"></div>
 
-        function login() {
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
+<script>
+    let totalEarnings = 0;
+    let transactionHistory = [];
+    let bankAccounts = [];
 
-            if (email === 'mithunchauhan16964@gmail.com' && password === '@12345') {
-                document.getElementById('login-section').style.display = 'none';
-                document.getElementById('dashboard-section').style.display = 'block';
-                document.getElementById('user-email').innerText = email;
-            } else {
-                alert('Invalid credentials');
-            }
+    function login() {
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+
+        if (email === 'mithunchauhan16964@gmail.com' && password === '@12345') {
+            document.getElementById('login-section').style.display = 'none';
+            document.getElementById('dashboard-section').style.display = 'block';
+            document.getElementById('user-email').innerText = email;
+        } else {
+            alert('Invalid credentials');
+        }
+    }
+
+    function addBankAccount() {
+        const name = document.getElementById('account-name').value;
+        const ifsc = document.getElementById('ifsc').value;
+        const accNum = document.getElementById('account-number').value;
+
+        if (!name || !ifsc || !accNum) {
+            alert('Please fill all fields');
+            return;
         }
 
-        function addBankAccount() {
-            const name = document.getElementById('account-name').value;
-            const ifsc = document.getElementById('ifsc').value;
-            const accNum = document.getElementById('account-number').value;
+        bankAccounts.push(name);
+        startNotifications(name);
+        alert('Bank Account added successfully');
+    }
 
-            if (!name || !ifsc || !accNum) {
-                alert('Please fill all fields');
-                return;
-            }
-
-            simulateDepositNotifications(name);
-            alert('Bank Account added successfully');
-        }
-
-        function simulateDepositNotifications(accountName) {
-            setInterval(() => {
-                const amount = Math.floor(Math.random() * (1000 - 100 + 1)) + 100;
-                totalEarnings += amount;
-                document.getElementById('total-earnings').innerText = totalEarnings.toFixed(2);
-
-                const now = new Date().toLocaleString();
-                transactionHistory.push({ date: now, account: accountName, amount });
-
-                const row = `<tr><td>${now}</td><td>${accountName}</td><td>₹${amount}</td></tr>`;
-                document.getElementById('transaction-log').innerHTML = row + document.getElementById('transaction-log').innerHTML;
-
-                showCustomNotification(accountName, amount, now);
-            }, 5000);
-        }
-
-        function showCustomNotification(accountName, amount, time) {
-            const notification = document.getElementById('custom-notification');
-            document.getElementById('notif-message').innerText = `₹${amount} credited to ${accountName}`;
-            document.getElementById('notif-time').innerText = time;
-            notification.style.display = 'flex';
-
-            setTimeout(() => { notification.style.display = 'none'; }, 5000);
-        }
-
-        function processPayout() {
-            const payoutAmount = parseFloat(document.getElementById('payout-amount').value);
-
-            if (isNaN(payoutAmount) || payoutAmount <= 0 || payoutAmount > totalEarnings) {
-                alert('Invalid payout amount');
-                return;
-            }
-
-            totalEarnings -= payoutAmount;
+    function startNotifications(accountName) {
+        setInterval(() => {
+            const amount = Math.floor(Math.random() * (1000 - 100 + 1)) + 100;
+            totalEarnings += amount;
             document.getElementById('total-earnings').innerText = totalEarnings.toFixed(2);
-            alert(`Payout of ₹${payoutAmount} processed successfully`);
+
+            const now = new Date().toLocaleString();
+            transactionHistory.push({ date: now, account: accountName, amount });
+
+            const row = `<tr><td>${now}</td><td>${accountName}</td><td>₹${amount}</td></tr>`;
+            document.getElementById('transaction-log').innerHTML = row + document.getElementById('transaction-log').innerHTML;
+
+            showCustomNotification(accountName, amount, now);
+        }, 2000);
+    }
+
+    function showCustomNotification(accountName, amount, time) {
+        const container = document.getElementById('notifications-container');
+
+        const notif = document.createElement('div');
+        notif.classList.add('custom-notification');
+
+        notif.innerHTML = `
+            <img src="logo.gif" alt="Notification"/>
+            <div class="notif-content">
+                <span class="notif-amount">₹${amount} credited</span>
+                <span class="notif-text">${accountName} • ${time}</span>
+            </div>
+        `;
+
+        container.prepend(notif);
+
+        // remove notification after 3 seconds
+        setTimeout(() => {
+            notif.remove();
+        }, 3000);
+    }
+
+    function processPayout() {
+        const payoutAmount = parseFloat(document.getElementById('payout-amount').value);
+
+        if (isNaN(payoutAmount) || payoutAmount <= 0 || payoutAmount > totalEarnings) {
+            alert('Invalid payout amount');
+            return;
         }
 
-        function exportCSV() {
-            let csv = "Date,Account,Amount\n";
-            transactionHistory.forEach(tx => {
-                csv += `"${tx.date}","${tx.account}",${tx.amount}\n`;
-            });
+        totalEarnings -= payoutAmount;
+        document.getElementById('total-earnings').innerText = totalEarnings.toFixed(2);
+        alert(`Payout of ₹${payoutAmount} processed successfully`);
+    }
 
-            const blob = new Blob([csv], { type: 'text/csv' });
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(blob);
-            link.download = 'transactions.csv';
-            link.click();
-        }
-    </script>
+    function exportCSV() {
+        let csv = "Date,Account,Amount\n";
+        transactionHistory.forEach(tx => {
+            csv += `"${tx.date}","${tx.account}",${tx.amount}\n`;
+        });
+
+        const blob = new Blob([csv], { type: 'text/csv' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = 'transactions.csv';
+        link.click();
+    }
+</script>
+
 </body>
-
-</html>
+    </html>
